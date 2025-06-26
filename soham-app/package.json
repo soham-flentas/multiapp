@@ -1,0 +1,8 @@
+{
+  "name": "soham-app",
+  "version": "1.0.0",
+  "main": "soham.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

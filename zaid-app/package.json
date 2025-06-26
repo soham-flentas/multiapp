@@ -1,0 +1,8 @@
+{
+  "name": "zaid-app",
+  "version": "1.0.0",
+  "main": "zaid.js",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

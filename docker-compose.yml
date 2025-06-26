@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  zaid-app:
+    build:
+      context: ./zaid-app
+    ports:
+      - "9001:9001"
+    container_name: zaid-app
+
+  soham-app:
+    build:
+      context: ./soham-app
+    ports:
+      - "9002:9002"
+    container_name: soham-app
