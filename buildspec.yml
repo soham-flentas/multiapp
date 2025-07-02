@@ -1,0 +1,31 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 948082844272.dkr.ecr.ap-south-1.amazonaws.com
+
+  build:
+    commands:
+      - echo Building Docker images...
+      - docker build -t soham-app-app ./soham-app
+      - docker build -t zaid-app-app ./zaid-app
+      - docker tag soham-app-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app-app:latest
+      - docker tag zaid-app-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app-app:latest
+
+  post_build:
+    commands:
+      - echo Pushing Docker images to ECR...
+      - docker push 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app-app:latest
+      - docker push 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app-app:latest
+
+      - echo Writing imagedefinitions.json...
+      - printf '[{"name":"soham-app-app","imageUri":"%s"},{"name":"zaid-app-app","imageUri":"%s"}]' \
+        948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app-app:latest \
+        948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app-app:latest > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+
