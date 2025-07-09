@@ -10,32 +10,32 @@ env:
 phases:
   pre_build:
     commands:
-      - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+      - echo "📍 Logging in to Amazon ECR..."
+      - export ECR_URL=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
+      - echo "Logging into: $ECR_URL"
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_URL
 
   build:
     commands:
-      - echo Building Docker images...
+      - echo "📦 Building Docker images..."
       - docker build -t $SOHAM_IMAGE ./soham-app
       - docker build -t $ZAID_IMAGE ./zaid-app
-
-      - echo Tagging images...
-      - docker tag $SOHAM_IMAGE:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SOHAM_IMAGE:latest
-      - docker tag $ZAID_IMAGE:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ZAID_IMAGE:latest
+      - echo "🔖 Tagging Docker images..."
+      - docker tag $SOHAM_IMAGE:latest $ECR_URL/$SOHAM_IMAGE:latest
+      - docker tag $ZAID_IMAGE:latest $ECR_URL/$ZAID_IMAGE:latest
 
   post_build:
     commands:
-      - echo Pushing Docker images to ECR...
-      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SOHAM_IMAGE:latest
-      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ZAID_IMAGE:latest
-
-      - echo Writing imagedefinitions.json...
+      - echo "🚀 Pushing Docker images to ECR..."
+      - docker push $ECR_URL/$SOHAM_IMAGE:latest
+      - docker push $ECR_URL/$ZAID_IMAGE:latest
+      - echo "📝 Writing imagedefinitions.json for CodeDeploy..."
       - printf '[{"name":"%s","imageUri":"%s"},{"name":"%s","imageUri":"%s"}]' \
-        $SOHAM_IMAGE $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SOHAM_IMAGE:latest \
-        $ZAID_IMAGE $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ZAID_IMAGE:latest \
+        $SOHAM_IMAGE $ECR_URL/$SOHAM_IMAGE:latest \
+        $ZAID_IMAGE $ECR_URL/$ZAID_IMAGE:latest \
         > imagedefinitions.json
+      - cat imagedefinitions.json
 
 artifacts:
   files:
     - imagedefinitions.json
-
