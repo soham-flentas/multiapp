@@ -3,29 +3,24 @@ version: 0.2
 phases:
   pre_build:
     commands:
-      - echo "🔐 Logging in to Amazon ECR..."
-      - export REGION=ap-south-1
-      - export ACCOUNT_ID=948082844272
-      - export ECR_URL=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
-      - echo "Using ECR: $ECR_URL"
-      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_URL
+      - echo "Logging in to ECR..."
+      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 948082844272.dkr.ecr.ap-south-1.amazonaws.com
 
   build:
     commands:
-      - echo "🐳 Building Docker images..."
-      - docker build -t soham-app-app ./soham-app
-      - docker build -t zaid-app-app ./zaid-app
-      - echo "🔖 Tagging Docker images..."
-      - docker tag soham-app-app:latest $ECR_URL/soham-app-app:latest
-      - docker tag zaid-app-app:latest $ECR_URL/zaid-app-app:latest
+      - echo "Building Docker images..."
+      - docker build -t soham-app ./soham-app
+      - docker build -t zaid-app ./zaid-app
+      - docker tag soham-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app:latest
+      - docker tag zaid-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app:latest
 
   post_build:
     commands:
-      - echo "🚀 Pushing Docker images to ECR..."
-      - docker push $ECR_URL/soham-app-app:latest
-      - docker push $ECR_URL/zaid-app-app:latest
-      - echo "📝 Writing imagedefinitions.json for ECS CodeDeploy..."
-      - printf '[{"name":"soham-app-app","imageUri":"%s"},{"name":"zaid-app-app","imageUri":"%s"}]' $ECR_URL/soham-app-app:latest $ECR_URL/zaid-app-app:latest > imagedefinitions.json
+      - echo "Pushing Docker images to ECR..."
+      - docker push 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app:latest
+      - docker push 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app:latest
+      - echo "Creating imagedefinitions.json..."
+      - printf '[{"name":"soham-app","imageUri":"948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app:latest"},{"name":"zaid-app","imageUri":"948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app:latest"}]' > imagedefinitions.json
       - cat imagedefinitions.json
 
 artifacts:
