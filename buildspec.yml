@@ -1,29 +1,39 @@
 version: 0.2
 
+env:
+  variables:
+    REGION: ap-south-1
+    ACCOUNT_ID: 948082844272
+    SOHAM_IMAGE: soham-app-app
+    ZAID_IMAGE: zaid-app-app
+
 phases:
   pre_build:
     commands:
       - echo Logging in to Amazon ECR...
-      - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 948082844272.dkr.ecr.ap-south-1.amazonaws.com
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
 
   build:
     commands:
       - echo Building Docker images...
-      - docker build -t soham-app-app ./soham-app
-      - docker build -t zaid-app-app ./zaid-app
-      - docker tag soham-app-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app-app:latest
-      - docker tag zaid-app-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app-app:latest
+      - docker build -t $SOHAM_IMAGE ./soham-app
+      - docker build -t $ZAID_IMAGE ./zaid-app
+
+      - echo Tagging images...
+      - docker tag $SOHAM_IMAGE:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SOHAM_IMAGE:latest
+      - docker tag $ZAID_IMAGE:latest $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ZAID_IMAGE:latest
 
   post_build:
     commands:
       - echo Pushing Docker images to ECR...
-      - docker push 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app-app:latest
-      - docker push 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app-app:latest
+      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SOHAM_IMAGE:latest
+      - docker push $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ZAID_IMAGE:latest
 
       - echo Writing imagedefinitions.json...
-      - printf '[{"name":"soham-app-app","imageUri":"%s"},{"name":"zaid-app-app","imageUri":"%s"}]' \
-        948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app-app:latest \
-        948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app-app:latest > imagedefinitions.json
+      - printf '[{"name":"%s","imageUri":"%s"},{"name":"%s","imageUri":"%s"}]' \
+        $SOHAM_IMAGE $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$SOHAM_IMAGE:latest \
+        $ZAID_IMAGE $ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$ZAID_IMAGE:latest \
+        > imagedefinitions.json
 
 artifacts:
   files:
