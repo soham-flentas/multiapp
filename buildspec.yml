@@ -1,41 +1,37 @@
 version: 0.2
 
-env:
-  variables:
-    REGION: ap-south-1
-    ACCOUNT_ID: 948082844272
-    SOHAM_IMAGE: soham-app-app
-    ZAID_IMAGE: zaid-app-app
-
 phases:
   pre_build:
     commands:
-      - echo "📍 Logging in to Amazon ECR..."
-      - export ECR_URL=${ACCOUNT_ID}.dkr.ecr.${REGION}.amazonaws.com
-      - echo "Logging into: $ECR_URL"
+      - echo "🔐 Logging in to Amazon ECR..."
+      - export REGION=ap-south-1
+      - export ACCOUNT_ID=948082844272
+      - export ECR_URL=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com
+      - echo "Using ECR: $ECR_URL"
       - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $ECR_URL
 
   build:
     commands:
-      - echo "📦 Building Docker images..."
-      - docker build -t $SOHAM_IMAGE ./soham-app
-      - docker build -t $ZAID_IMAGE ./zaid-app
+      - echo "🐳 Building Docker images..."
+      - docker build -t soham-app-app ./soham-app
+      - docker build -t zaid-app-app ./zaid-app
       - echo "🔖 Tagging Docker images..."
-      - docker tag $SOHAM_IMAGE:latest $ECR_URL/$SOHAM_IMAGE:latest
-      - docker tag $ZAID_IMAGE:latest $ECR_URL/$ZAID_IMAGE:latest
+      - docker tag soham-app-app:latest $ECR_URL/soham-app-app:latest
+      - docker tag zaid-app-app:latest $ECR_URL/zaid-app-app:latest
 
   post_build:
     commands:
       - echo "🚀 Pushing Docker images to ECR..."
-      - docker push $ECR_URL/$SOHAM_IMAGE:latest
-      - docker push $ECR_URL/$ZAID_IMAGE:latest
-      - echo "📝 Writing imagedefinitions.json for CodeDeploy..."
-      - printf '[{"name":"%s","imageUri":"%s"},{"name":"%s","imageUri":"%s"}]' \
-        $SOHAM_IMAGE $ECR_URL/$SOHAM_IMAGE:latest \
-        $ZAID_IMAGE $ECR_URL/$ZAID_IMAGE:latest \
-        > imagedefinitions.json
+      - docker push $ECR_URL/soham-app-app:latest
+      - docker push $ECR_URL/zaid-app-app:latest
+
+      - echo "📝 Writing imagedefinitions.json for ECS CodeDeploy..."
+      - printf '[{"name":"soham-app-app","imageUri":"%s"},{"name":"zaid-app-app","imageUri":"%s"}]' \
+        $ECR_URL/soham-app-app:latest \
+        $ECR_URL/zaid-app-app:latest > imagedefinitions.json
       - cat imagedefinitions.json
 
 artifacts:
   files:
     - imagedefinitions.json
+
