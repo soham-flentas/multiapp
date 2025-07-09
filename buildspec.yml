@@ -24,11 +24,8 @@ phases:
       - echo "🚀 Pushing Docker images to ECR..."
       - docker push $ECR_URL/soham-app-app:latest
       - docker push $ECR_URL/zaid-app-app:latest
-
       - echo "📝 Writing imagedefinitions.json for ECS CodeDeploy..."
-      - printf '[{"name":"soham-app-app","imageUri":"%s"},{"name":"zaid-app-app","imageUri":"%s"}]' \
-        $ECR_URL/soham-app-app:latest \
-        $ECR_URL/zaid-app-app:latest > imagedefinitions.json
+      - printf '[{"name":"soham-app-app","imageUri":"%s"},{"name":"zaid-app-app","imageUri":"%s"}]' $ECR_URL/soham-app-app:latest $ECR_URL/zaid-app-app:latest > imagedefinitions.json
       - cat imagedefinitions.json
 
 artifacts:
