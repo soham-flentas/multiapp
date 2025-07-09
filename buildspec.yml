@@ -9,8 +9,8 @@ phases:
   build:
     commands:
       - echo "Building Docker images..."
-      - docker build -t soham-app ./multi-app
-      - docker build -t zaid-app ./multi-app
+      - docker build -t soham-app ./soham-app
+      - docker build -t zaid-app ./zaid-app
       - docker tag soham-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/soham-app:latest
       - docker tag zaid-app:latest 948082844272.dkr.ecr.ap-south-1.amazonaws.com/zaid-app:latest
 
